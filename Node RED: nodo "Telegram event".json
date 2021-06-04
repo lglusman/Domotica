@@ -1,0 +1,322 @@
+[
+    {
+        "id": "75ff0f1e.3a81a",
+        "type": "tab",
+        "label": "Node RED: nodo \"Telegram event\" ",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "45d78603.c9d908",
+        "type": "telegram command",
+        "z": "75ff0f1e.3a81a",
+        "name": "/prueba",
+        "command": "/prueba",
+        "bot": "3d8c9bdf.27879c",
+        "strict": false,
+        "hasresponse": false,
+        "useregex": false,
+        "removeregexcommand": false,
+        "outputs": 1,
+        "x": 110,
+        "y": 200,
+        "wires": [
+            [
+                "c842a9f5.90d9e8"
+            ]
+        ]
+    },
+    {
+        "id": "c842a9f5.90d9e8",
+        "type": "function",
+        "z": "75ff0f1e.3a81a",
+        "name": "mensaje inicial del teclado",
+        "func": "// Guardamos el identificador del mensaje actual\nglobal.set(\"kb\", { messageId : msg.payload.messageId });\n\n// Configuramos todas las opciones a mostrar según requiere Telegram\nvar opts = {\n  reply_to_message_id: msg.payload.messageId,\n  reply_markup: JSON.stringify({\n    \"inline_keyboard\": [[\n                {\n                    \"text\": \"Escritorio\",\n                    \"callback_data\": \"switch.luz_escritorio\"            \n                }, \n                {\n                    \"text\": \"Habitacion\",\n                    \"callback_data\": \"switch.luz_habitacion\"            \n                },\n                {\n                    \"text\": \"Balcon\",\n                    \"callback_data\": \"switch.luz_balcon\"            \n                },\n                {\n                    \"text\": \"Pasillo\",\n                    \"callback_data\": \"switch.luz_pasillo\"            \n                }\n                ]\n            ]\n  })\n};\n\n// Configuramos el mensaje que saldrá junto con las opciones\nmsg.payload.content = \"Seleccione el dispositvo\";\nmsg.payload.options = opts;\n\nreturn [ msg ];\n",
+        "outputs": "1",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 200,
+        "wires": [
+            [
+                "4876a98c.7f0a58"
+            ]
+        ]
+    },
+    {
+        "id": "4876a98c.7f0a58",
+        "type": "telegram sender",
+        "z": "75ff0f1e.3a81a",
+        "name": "mostrar teclado inline",
+        "bot": "3d8c9bdf.27879c",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 560,
+        "y": 200,
+        "wires": [
+            [
+                "90240620.906898"
+            ]
+        ]
+    },
+    {
+        "id": "90240620.906898",
+        "type": "function",
+        "z": "75ff0f1e.3a81a",
+        "name": "guardar variables globales",
+        "func": "// Guardamos el identificador del mensaje actual\nglobal.set(\"kb\", { messageId : msg.payload.sentMessageId });\n\n// Ponemos el incremental para el Callback Query a 1 \nglobal.set(\"cN\", 1);\n\nreturn [ msg ];\n",
+        "outputs": "1",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dab2f537.684c78",
+        "type": "telegram event",
+        "z": "75ff0f1e.3a81a",
+        "name": "Callback Query",
+        "bot": "3d8c9bdf.27879c",
+        "event": "callback_query",
+        "autoanswer": true,
+        "x": 140,
+        "y": 400,
+        "wires": [
+            [
+                "758261a.b39d6a",
+                "71dd594c.90f678"
+            ]
+        ],
+        "info": "ALL CALL BACK QUERIES ARE READ BY\nALL CALL BACK QUERRY NODES. This means\nwhether you only need one callback_query\nfor all of NodeRED. You just have to sort them."
+    },
+    {
+        "id": "758261a.b39d6a",
+        "type": "function",
+        "z": "75ff0f1e.3a81a",
+        "name": "editar mensaje del teclado",
+        "func": "// ¿No es la primera llamada? Pasamos..\nif(global.get(\"cN\") != 1){\n    return;\n}\n\n// Obtenemos el identificador del mensaje inicial\nvar messageId = global.get(\"kb\").messageId;\n\n// Modificamos el teclado inline actual con otras opciones\nvar reply_markup = JSON.stringify({\n    \"inline_keyboard\": [[\n                {\n                    \"text\": \"Encender\",\n                    \"callback_data\": \"on\"            \n                }, \n                {\n                    \"text\": \"Apagar\",\n                    \"callback_data\": \"off\"            \n                }\n                ]\n            ]\n  });\n\n// Configuramos las opciones para la respuesta\nvar options = {\n    chat_id : msg.payload.chatId,\n    reply_markup : reply_markup,\n    message_id : messageId\n};\n\nmsg.payload.type = \"editMessageReplyMarkup\";\nmsg.payload.content = reply_markup;\nmsg.payload.options = options;\n\nreturn [ msg ];\n",
+        "outputs": "1",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 320,
+        "wires": [
+            [
+                "a75c8af5.c511c8"
+            ]
+        ]
+    },
+    {
+        "id": "a75c8af5.c511c8",
+        "type": "telegram sender",
+        "z": "75ff0f1e.3a81a",
+        "name": "respuesta a Callback Query",
+        "bot": "3d8c9bdf.27879c",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 680,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "71dd594c.90f678",
+        "type": "function",
+        "z": "75ff0f1e.3a81a",
+        "name": "hacemos con el Callback Query esto:",
+        "func": "if (global.get(\"cN\") == 1) {\n    let ret = \"\";\n    if (msg.payload.content === \"on\" || msg.payload.content === \"off\") {\n        msg.payload.type = \"deleteMessage\";\n        msg.topic = msg.payload.content;\n        msg.payload.content = global.get(\"kb\").messageId\n        global.set(\"kb\", {\n            messageId: null\n        });\n        global.set(\"cN\", null);\n        ret = [msg, null];\n    } else {\n        msg.topic = msg.payload.content;\n        return [null, msg];\n    }\n\n    return ret;\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 480,
+        "wires": [
+            [
+                "a75c8af5.c511c8",
+                "b91adc1f.5de98"
+            ],
+            [
+                "b91adc1f.5de98"
+            ]
+        ]
+    },
+    {
+        "id": "94113bdd.bb4e78",
+        "type": "join",
+        "z": "75ff0f1e.3a81a",
+        "name": "esperar y juntar",
+        "mode": "custom",
+        "build": "array",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "20",
+        "count": "2",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 760,
+        "y": 480,
+        "wires": [
+            [
+                "ed17e0e4.edb18"
+            ]
+        ]
+    },
+    {
+        "id": "ed17e0e4.edb18",
+        "type": "function",
+        "z": "75ff0f1e.3a81a",
+        "name": "finalmente",
+        "func": "msg.payload.domain = msg.payload[0].split(\".\")[0];\nmsg.payload.service = \"turn_\" + msg.payload[1];\nmsg.payload.data = {entity_id: msg.payload[0]};\nreturn [msg, null];\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 480,
+        "wires": [
+            [
+                "3768309d.a646"
+            ]
+        ]
+    },
+    {
+        "id": "3768309d.a646",
+        "type": "api-call-service",
+        "z": "75ff0f1e.3a81a",
+        "name": "Encender / Apagar Dispositivos",
+        "server": "2e0f828a.d95dbe",
+        "version": 3,
+        "debugenabled": false,
+        "service_domain": "",
+        "service": "",
+        "entityId": "",
+        "data": "",
+        "dataType": "jsonata",
+        "mergecontext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "x": 1190,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "93512fd7.b65a8",
+        "type": "catch",
+        "z": "75ff0f1e.3a81a",
+        "name": "",
+        "scope": [
+            "a75c8af5.c511c8"
+        ],
+        "uncaught": false,
+        "x": 110,
+        "y": 120,
+        "wires": [
+            [
+                "2cb18b6.fb4c174"
+            ]
+        ]
+    },
+    {
+        "id": "2cb18b6.fb4c174",
+        "type": "debug",
+        "z": "75ff0f1e.3a81a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 230,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "b91adc1f.5de98",
+        "type": "change",
+        "z": "75ff0f1e.3a81a",
+        "name": "del topic al payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "topic",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 770,
+        "y": 560,
+        "wires": [
+            [
+                "94113bdd.bb4e78"
+            ]
+        ]
+    },
+    {
+        "id": "3d8c9bdf.27879c",
+        "type": "telegram bot",
+        "botname": "lglusmanHA_bot",
+        "usernames": "",
+        "chatids": "",
+        "baseapiurl": "",
+        "updatemode": "polling",
+        "pollinterval": "300",
+        "usesocks": false,
+        "sockshost": "",
+        "socksport": "6667",
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbotport": "8443",
+        "publicbotport": "8443",
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    },
+    {
+        "id": "2e0f828a.d95dbe",
+        "type": "server",
+        "name": "Home Assistant",
+        "version": 1,
+        "legacy": false,
+        "addon": true,
+        "rejectUnauthorizedCerts": true,
+        "ha_boolean": "y|yes|true|on|home|open",
+        "connectionDelay": true,
+        "cacheJson": false
+    }
+]
